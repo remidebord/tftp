@@ -129,6 +129,8 @@ int tftp_rrq(int sock, struct sockaddr_in *saddr, char *filename, char* buffer, 
 
 	length += snprintf(&buffer[length], size - length, "%s", mode);
 
+	buffer[length++] = 0x00;
+
 	result = tftp_send(sock, saddr, buffer, length);
 	if (result == -1) {
 		printf("sendto error (%d: %s).\n", errno, strerror(errno));
@@ -190,6 +192,8 @@ int tftp_wrq(int sock, struct sockaddr_in *saddr, char *filename)
 	buffer[length++] = 0x00;
 
 	length += snprintf(&buffer[length], sizeof(buffer) - length, "%s", mode);
+
+	buffer[length++] = 0x00;
 
 	result = tftp_send(sock, saddr, buffer, length);
 	if (result == -1) {
