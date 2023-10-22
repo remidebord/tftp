@@ -1,27 +1,40 @@
-ifeq ($(DEBUG), y)
-	CFLAGS = -Wall -O -g -DDEBUG
-else
-	CFLAGS = -Wall -O
-endif
-
 ifndef CC
 	CC = gcc
 endif
 
+CFLAGS = -Wall -O
+
 all: tftp tftpd
 
-tftp: tftp.o
-	$(CC) -o tftp tftp.o
+debug: CFLAGS = -Wall -O -g -DDEBUG
+debug: all
 
-tftpd: tftpd.o
-	$(CC) -o tftpd tftpd.o
+PROG_CLIENT=tftp
+PROG_SERVER=tftpd
 
-tftp.o: tftp.c
-	$(CC) $(CFLAGS) -c tftp.c 
+SOURCES_COMMON=tftp.c utils.c
+SOURCES_CLIENT=client.c
+SOURCES_SERVER=server.c
 
-tftpd.o: tftpd.c
-	$(CC) $(CFLAGS) -c tftpd.c 
+OBJECTS_COMMON=$(SOURCES_COMMON:.c=.o)
+OBJECTS_CLIENT=$(SOURCES_CLIENT:.c=.o)
+OBJECTS_SERVER=$(SOURCES_SERVER:.c=.o)
+
+${PROG_CLIENT}: ${OBJECTS_CLIENT} ${OBJECTS_COMMON}
+	$(CC) -o ${PROG_CLIENT} ${OBJECTS_CLIENT} ${OBJECTS_COMMON}
+
+${PROG_SERVER}: ${OBJECTS_SERVER} ${OBJECTS_COMMON}
+	$(CC) -o ${PROG_SERVER} ${OBJECTS_SERVER} ${OBJECTS_COMMON}
+
+${OBJECTS_CLIENT}: ${SOURCES_CLIENT}
+	$(CC) $(CFLAGS) -c ${SOURCES_CLIENT}
+
+${OBJECTS_SERVER}: ${SOURCES_SERVER}
+	$(CC) $(CFLAGS) -c ${SOURCES_SERVER}
+
+${OBJECTS_COMMON}: ${SOURCES_COMMON}
+	$(CC) $(CFLAGS) -c ${SOURCES_COMMON}
 
 clean:
-	rm -f *.o tftp tftpd
+	rm -f *.o ${PROG_CLIENT} ${PROG_SERVER}
 
